@@ -1,0 +1,54 @@
+.page{
+	position:relative;
+	width: 1024px;
+	font-family: "¸¼Àº °íµñ";
+	margin-left: 200px;
+}
+
+.tables{
+	margin-top: 10px;
+}
+
+.tables>table{
+	height: 100px;
+	float: left;
+	width:400px;
+	border-collapse:collapse;	
+}
+.tables>div{
+	height: 98px;
+	float: left;
+	width: 620px; 
+	border: 1px solid black;
+}
+.tables>div>div{
+	margin-top: 2px;
+	height: 96px;
+	float: right;
+	width: 95px; 
+}
+
+.tables>div>div>table{
+	width: 95px;
+	height: 95px; 
+	font-size: 11px;
+	text-align: center;
+	border-collapse:collapse;
+}
+
+.mainT{
+	border-collapse:collapse;	
+	width: 848px;
+	font-size: 25px;
+	table-layout: fixed;
+}
+.mainT>td{
+	width: 170px;
+}
+.tableTSB{
+	border-collapse:collapse;	
+	width: 848px;
+	font-size: 20px;
+}
+
+

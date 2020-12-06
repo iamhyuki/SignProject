@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="signDoc">
+	<!-- 결재문서, 결재자, 결재파일 등록 -->
+	<insert id="insertSignDoc">
+		INSERT INTO SIGN_DOC (DOC_CODE, USER_ID, NAME, TITLE, CONTENT, SIGN_TURN,  DOC_STATUS) 
+		VALUES (SIGN_SEQ.NEXTVAL, #{user_id}, #{name}, #{title}, #{content}, #{sign_turn}, #{doc_status})
+	</insert>		
+		
+	<insert id="insertSignGroup">
+		INSERT INTO SIGN_GROUP (DOC_CODE, USER_ID, SIGN_ID, SIGN_TURN, SIGN_TYPE) 
+		VALUES ((SELECT MAX(DOC_CODE) FROM SIGN_DOC), #{user_id}, #{sign_id}, #{sign_turn}, #{sign_type})
+	</insert>	
+		
+	<insert id="insertSignFile">
+		INSERT INTO SIGN_FILE (DOC_CODE, ORGNAME, SYSNAME)
+		VALUES ((SELECT MAX(DOC_CODE) FROM SIGN_DOC), #{orgname}, #{sysname})
+	</insert>
+
+	<!-- 결재번호 해당하는 결재문서, 결재자, 첨부파일 조회 -->
+	<select id="getSignDoc" parameterType="int" resultType="signDoc">
+		SELECT DOC_CODE, NAME, USER_ID, TO_CHAR(WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE, TITLE, CONTENT, SIGN_TURN, DOC_STATUS FROM SIGN_DOC 
+		WHERE DOC_CODE IN #{doc_code}
+	</select>
+
+	<select id="getSignGroup" parameterType="int" resultType="com.kjh.biz.etc.SignGroupListVO">
+		SELECT G.SIGN_ID, U.NAME, U.RANK, G.SIGN_TURN, G.SIGN_TYPE, G.SIGN_STATUS  
+		FROM SIGN_GROUP G, USERS U 
+		WHERE G.SIGN_ID=U.USER_ID AND DOC_CODE IN #{doc_code}
+		ORDER BY G.SIGN_TURN ASC
+	</select>
+
+	<select id="getSignFile" parameterType="int" resultType="signFile">
+		SELECT ORGNAME, SYSNAME FROM SIGN_FILE 
+		WHERE DOC_CODE IN #{doc_code}
+		AND DEL_FLAG IN ('N')
+	</select>
+	
+	<select id="getGroupCount" resultType="int">
+		SELECT COUNT(*) AS G_COUNT FROM SIGN_GROUP WHERE DOC_CODE = #{doc_code}
+	</select>
+	
+	<!-- 상세보기에 들어갈 문서 조회 -->
+	<select id="getSignDocDetail" parameterType="int" resultType="com.kjh.biz.etc.SignDocListVO">
+	SELECT D.DOC_CODE, D.NAME, D.USER_ID, TO_CHAR(D.WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE, D.TITLE, D.CONTENT, D.DOC_STATUS, D.SIGN_TURN, G.SIGN_ID
+	FROM SIGN_DOC D 
+	LEFT OUTER JOIN SIGN_GROUP G ON D.SIGN_TURN = G.SIGN_TURN AND D.DOC_CODE = G.DOC_CODE
+	WHERE D.DOC_CODE = #{doc_code}
+	</select>
+	
+	<!-- (임시저장문서) 결재문서 삭제 -->
+	<delete id="deleteSignDoc" parameterType="int">
+		DELETE FROM SIGN_DOC WHERE DOC_CODE = #{doc_code}
+	</delete>
+	
+	<!-- (임시저장문서)  결재문서, 결재자, 첨부파일 관련 쿼리-->
+	<update id="updateSignDoc">
+		UPDATE SIGN_DOC SET 
+		TITLE=#{title}, CONTENT=#{content}, SIGN_TURN=#{sign_turn}, DOC_STATUS = 1  
+		WHERE DOC_CODE = #{doc_code}
+	</update>
+	
+	<delete id="deleteSignGroup">
+		DELETE FROM SIGN_GROUP WHERE DOC_CODE = #{doc_code}
+	</delete>
+	
+	<insert id="insertSignGroupR">
+		INSERT INTO SIGN_GROUP (DOC_CODE, USER_ID, SIGN_ID, SIGN_TURN, SIGN_TYPE) 
+		VALUES (#{doc_code}, #{user_id}, #{sign_id}, #{sign_turn}, #{sign_type})
+	</insert>
+	
+	<update id="updateFile">
+		UPDATE SIGN_FILE SET DEL_FLAG ='Y' WHERE SYSNAME = #{sysname}
+	</update>
+
+	<!-- 문서상태 변경 -->
+	<update id="updateDocStatus">
+		UPDATE SIGN_DOC SET DOC_STATUS = #{doc_status}, COMPLETE_DATE = #{complete_date} 
+		WHERE DOC_CODE = #{doc_code}
+	</update>
+		
+	<!-- 결재자 결재상태 변경 -->
+	<update id="updateSignStatus">
+		UPDATE SIGN_GROUP SET SIGN_STATUS = 1 
+		WHERE DOC_CODE IN #{doc_code} AND SIGN_ID=#{sign_id}
+	</update>
+	
+	<!-- 결재문서 결재순서 변경 -->
+	<update id="updateDocTurn">
+		UPDATE SIGN_DOC SET SIGN_TURN = SIGN_TURN-1
+		 WHERE DOC_CODE = #{doc_code}
+	</update>
+	
+	<!-- 문서상태 변경 여부 목적의 sign_turn 조회 -->
+	<select id="getDocTurn" resultType="int">
+		SELECT SIGN_TURN FROM SIGN_DOC WHERE DOC_CODE = #{doc_code}
+	</select>
+	
+	<!-- 다운로드를 위한 첨부파일 조회 -->
+	<select id="getFileInfo" parameterType="String" resultType="signFile">
+		SELECT ORGNAME, SYSNAME FROM SIGN_FILE WHERE SYSNAME = #{sysname}
+	</select>
+	
+</mapper>

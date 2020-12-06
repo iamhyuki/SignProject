@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.kjh.biz.user.UserVO" alias="user"/>
+		<typeAlias type="com.kjh.biz.sign.SignDocVO" alias="signDoc"/>
+		<typeAlias type="com.kjh.biz.sign.SignGroupVO" alias="signGroup"/>
+		<typeAlias type="com.kjh.biz.sign.SignFileVO" alias="signFile"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="mappings/signDoc-mapping.xml"/>
+		<mapper resource="mappings/signList-mapping.xml"/>
+		<mapper resource="mappings/user-mapping.xml"/>
+	</mappers>
+
+</configuration>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="signList">
+
+	<!-- 각 결재함 목록 개수 조회 -->
+	<!-- 임시저장함, 반려문서함, 결재상신함, 결재수신함, 완료문서함 -->
+	<select id="getSignTemCount" resultType="int">
+		SELECT COUNT(*) FROM SIGN_DOC WHERE USER_ID=#{user_id} AND DOC_STATUS IN (0)
+	</select>
+	<select id="getSignBackCount" resultType="int">
+		SELECT COUNT(*) FROM SIGN_DOC WHERE USER_ID=#{user_id} AND DOC_STATUS IN (3)
+	</select>
+	<select id="getSignSenCount" resultType="int">
+		SELECT COUNT(*) FROM SIGN_DOC WHERE USER_ID=#{user_id} AND DOC_STATUS IN (1,2)
+	</select>
+	<select id="getSignRecCount" resultType="int">
+		SELECT COUNT(*) FROM SIGN_DOC D, SIGN_GROUP G 
+		WHERE D.DOC_CODE=G.DOC_CODE AND G.SIGN_ID=#{user_id} AND D.DOC_STATUS IN (1,2)
+	</select>
+	<select id="getSignCmpCount" resultType="int">
+		SELECT COUNT(*) FROM SIGN_DOC WHERE DOC_STATUS=(4)
+	</select>
+
+	<!-- 기안자본인만 보이는 임시저장상태 목록 조회 -->
+	<select id="getSignTemList" resultType="signDoc">
+		SELECT DOC_CODE, TITLE, TO_CHAR(WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE FROM SIGN_DOC 
+		WHERE USER_ID=#{user_id} AND DOC_STATUS IN (0) ORDER BY DOC_CODE DESC
+	</select>
+	
+	<!-- 기안자본인만 보이는 반려상태 목록 조회 -->
+	<select id="getSignBackList" resultType="signDoc">
+		SELECT DOC_CODE, TITLE, TO_CHAR(WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE FROM SIGN_DOC 
+		WHERE USER_ID=#{user_id} AND DOC_STATUS IN (3) ORDER BY DOC_CODE DESC
+	</select>
+	
+	<!-- 기안자본인만 보이는 심사,대기중 상태목록 조회 -->
+	<select id="getSignSenList" resultType="signDoc">
+		SELECT DOC_CODE, TITLE, TO_CHAR(WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE, DOC_STATUS FROM SIGN_DOC 
+		WHERE USER_ID=#{user_id} AND DOC_STATUS IN (1,2) ORDER BY DOC_CODE DESC
+	</select>
+	
+	<!-- 결재선인원만 보이는 심사,대기중 수신함목록 조회 -->
+	<select id="getSignRecList" resultType="signDoc">
+		SELECT D.DOC_CODE, D.TITLE, D.NAME, TO_CHAR(D.WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE, DOC_STATUS 
+		FROM SIGN_DOC D, SIGN_GROUP G 
+		WHERE D.DOC_CODE=G.DOC_CODE AND D.DOC_STATUS IN (1,2) AND G.SIGN_ID=#{user_id}
+		ORDER BY DOC_CODE DESC
+	</select>
+	
+	<!-- 전체인원에게 보이는 결재완료 상태목록 조회 -->
+	<select id="getSignCmpList" resultType="signDoc">
+		SELECT DOC_CODE, TITLE, NAME, TO_CHAR(WRITEDATE, 'yyyy-MM-dd') AS WRITEDATE, DOC_STATUS, TO_CHAR(COMPLETE_DATE, 'yyyy-MM-dd') AS COMPLETE_DATE 
+		FROM SIGN_DOC WHERE DOC_STATUS IN (4)
+		ORDER BY DOC_CODE DESC
+	</select>
+	
+</mapper>
